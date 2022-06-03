@@ -3,5 +3,16 @@
     "solidity.formatter": "prettier",
     "[solidity]": {
         "editor.defaultFormatter": "JuanBlanco.solidity"
-    }
+    },
+    "python.formatting.provider": "black",
+    "solidity.remappings": [
+        /* External */
+        "@solmate/=lib/solmate/src/",
+        "@forge-std/=lib/forge-std/src/",
+        "@erc4626/=lib/ERC4626/src/",
+        /* Internal */
+        "@mocks/=test/mocks/",
+        "@src/=src/",
+        "@test/=test/"
+    ],
 }

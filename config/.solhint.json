@@ -3,15 +3,19 @@
   "rules": {
     "compiler-version": [
       "error",
-      ">=0.8.4"
+      "0.8.14"
     ],
     "avoid-low-level-calls": "off",
+    "not-rely-on-time": "off",
     "func-visibility": [
       "warn",
       {
         "ignoreConstructors": true
       }
     ],
-    "no-inline-assembly": "off"
+    "no-inline-assembly": "off",
+    "const-name-snakecase": "off",
+    "no-empty-blocks": "off",
+    "func-name-mixedcase": "off"
   }
 }

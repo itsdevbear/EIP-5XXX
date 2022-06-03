@@ -1,0 +1,7 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/pez/EIP-5XXX'
+forge update
+npm run lint
+forge clean && forge build --optimize --optimize-runs 1000000
+make: Leaving directory `/Users/pez/EIP-5XXX'
+ 
