@@ -6,6 +6,7 @@ import {ERC4626} from "@solmate/mixins/ERC4626.sol";
 import {FixedPointMathLib} from "@solmate/utils/FixedPointMathLib.sol";
 import {SafeTransferLib} from "@solmate/utils/SafeTransferLib.sol";
 
+/* is IERC4626 */
 interface IEIP5XXX {
     /*//////////////////////////////////////////////////////////////
                                  EVENTS

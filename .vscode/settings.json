@@ -7,7 +7,7 @@
     "python.formatting.provider": "black",
     "solidity.remappings": [
         /* External */
-        "@solmate/=lib/solmate/src/",
+        "@solmate/lib/solmate/src/",
         "@forge-std/=lib/forge-std/src/",
         "@erc4626/=lib/ERC4626/src/",
         /* Internal */
