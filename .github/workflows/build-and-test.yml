@@ -22,7 +22,7 @@ jobs:
           version: nightly
 
       - name: Run lint check
-        run: make lint-check
+        run: yarn lint
 
       - name: Run tests
-        run: make test
+        run: forge test

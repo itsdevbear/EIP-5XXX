@@ -62,20 +62,12 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
         @param owner address that has ownership rights to the rewards
         @return rewardAmounts amount of tokens that were redeemed
      */
-    function claimRewards(address receiver, address owner)
-        external
-        virtual
-        returns (uint256[] memory rewardAmounts)
-    {
+    function claimRewards(address receiver, address owner) external virtual returns (uint256[] memory rewardAmounts) {
         require(claimApproved[owner][receiver], "UNAPPROVED");
         uint256 len = rewardAssets.length;
         for (uint256 i = 0; i < len; ) {
             address rewardAsset = rewardAssets[i];
-            _claimRewards(
-                owner,
-                rewardAsset,
-                rewardAmounts[i] = _pendingRewards(owner, rewardAsset)
-            );
+            _claimRewards(owner, rewardAsset, rewardAmounts[i] = _pendingRewards(owner, rewardAsset));
             ERC20(rewardAsset).safeTransfer(receiver, rewardAmounts[i]);
             // safe unchecked: iteration is safe
             unchecked {
@@ -122,11 +114,7 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
         // If there are presently no shareholders, so we can start over
         // Any remainder in the earnings per share is rolled forward into
         // the next accrual period.
-        c.earnedPerShare.push(
-            noShares
-                ? 0
-                : c.earnedPerShare.head() + c.earnedRewards / totalShares
-        );
+        c.earnedPerShare.push(noShares ? 0 : c.earnedPerShare.head() + c.earnedRewards / totalShares);
         c.earnedRewards = noShares ? 0 : c.earnedRewards % totalShares;
     }
 
@@ -135,32 +123,19 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
         uint256 joinedTime = c.joinedAt[owner];
         uint256 balance = balanceOf[owner];
         bool noShares = balance == 0;
-        c.redeemableRewards[owner] += noShares
-            ? 0
-            : (c.earnedPerShare.head() - c.earnedPerShare[joinedTime]) *
-                balance;
+        c.redeemableRewards[owner] += noShares ? 0 : (c.earnedPerShare.head() - c.earnedPerShare[joinedTime]) * balance;
         c.joinedAt[owner] = c.earnedPerShare.length - 1;
     }
 
-    function _pendingRewards(address rewardAsset, address owner)
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
+    function _pendingRewards(address rewardAsset, address owner) internal view virtual returns (uint256) {
         RewardsContainer storage c = containers[rewardAsset];
         uint256 balance = balanceOf[owner];
 
         if (balance == 0) return c.redeemableRewards[owner];
 
-        uint256 currentEPS = c.earnedPerShare.head() +
-            c.earnedRewards /
-            totalSupply;
+        uint256 currentEPS = c.earnedPerShare.head() + c.earnedRewards / totalSupply;
 
-        return
-            (currentEPS - c.earnedPerShare[c.joinedAt[owner]]) *
-            balance +
-            c.redeemableRewards[owner];
+        return (currentEPS - c.earnedPerShare[c.joinedAt[owner]]) * balance + c.redeemableRewards[owner];
     }
 
     function _claimRewards(
@@ -196,12 +171,7 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
                              ERC20 OVERRIDES
     //////////////////////////////////////////////////////////////*/
 
-    function transfer(address to, uint256 amount)
-        public
-        virtual
-        override
-        returns (bool)
-    {
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
         uint256 len = rewardAssets.length;
         for (uint256 i = 0; i < len; ) {
             address rewardAsset = rewardAssets[i];

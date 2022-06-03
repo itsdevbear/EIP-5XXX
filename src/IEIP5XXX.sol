@@ -12,20 +12,10 @@ interface IEIP5XXX {
     //////////////////////////////////////////////////////////////*/
 
     ///@notice emitted when rewards are claimed
-    event RewardsClaimed(
-        address indexed receiver,
-        address indexed owner,
-        address[] tokens,
-        uint256[] amounts
-    );
+    event RewardsClaimed(address indexed receiver, address indexed owner, address[] tokens, uint256[] amounts);
 
     ///@notice emitted when rewards are supplied
-    event RewardsSupplied(
-        address indexed caller,
-        address indexed owner,
-        address[] tokens,
-        uint256[] amounts
-    );
+    event RewardsSupplied(address indexed caller, address indexed owner, address[] tokens, uint256[] amounts);
 
     function rewardAssets() external view returns (address[] memory);
 
@@ -39,9 +29,7 @@ interface IEIP5XXX {
         @param owner address that has ownership rights to the rewards
         @return rewardAmounts amount of tokens that were redeemed
      */
-    function claimRewards(address receiver, address owner)
-        external
-        returns (uint256[] memory rewardAmounts);
+    function claimRewards(address receiver, address owner) external returns (uint256[] memory rewardAmounts);
 
     /**
         @notice Supply rewards to distributor to depositors
