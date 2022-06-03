@@ -24,6 +24,9 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
     // Store a list of rewardAssets for iteration
     address[] public rewardAssets;
 
+    /// @notice approve contracts to withdrawl the rewards
+    mapping(address => mapping(address => bool)) public claimApproved;
+
     /// @notice dividend container lookup by token address
     mapping(address => RewardsContainer) private containers;
 
@@ -31,7 +34,7 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
        @notice The container stores information about the dividend program
      * @param earnedPerShare earned rewards per share
      * @param earnedRewards The total number of rewards that have been earned
-     * @param joinedAt The time when the user joined the rewards system
+     * @param joinedAt The time when the user joined the vault
      * @param redeemableRewards The available rewards that can be redeemed
      */
     struct RewardsContainer {
@@ -46,6 +49,14 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
     //////////////////////////////////////////////////////////////*/
 
     /**
+        @notice allow an address to claim rewards on behalf of another address
+        @param receiver approved address
+     */
+    function setClaimApproval(address receiver, bool status) external {
+        claimApproved[msg.sender][receiver] = status;
+    }
+
+    /**
         @notice returns the amount of tokens that have been earned by depositors
         @param receiver address to receieve the claim of rewards
         @param owner address that has ownership rights to the rewards
@@ -56,6 +67,7 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
         virtual
         returns (uint256[] memory rewardAmounts)
     {
+        require(claimApproved[owner][receiver], "UNAPPROVED");
         uint256 len = rewardAssets.length;
         for (uint256 i = 0; i < len; ) {
             address rewardAsset = rewardAssets[i];
@@ -64,10 +76,10 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
                 rewardAsset,
                 rewardAmounts[i] = _pendingRewards(owner, rewardAsset)
             );
-            ERC20(rewardAsset).transfer(receiver, rewardAmounts[i]);
+            ERC20(rewardAsset).safeTransfer(receiver, rewardAmounts[i]);
             // safe unchecked: iteration is safe
             unchecked {
-                i++;
+                ++i;
             }
         }
         emit RewardsClaimed(receiver, owner, rewardAssets, rewardAmounts);
@@ -179,4 +191,76 @@ abstract contract EIP5XXX is IEIP5XXX, ERC4626 {
     //////////////////////////////////////////////////////////////*/
 
     function totalAssets() public view virtual override returns (uint256);
+
+    /*//////////////////////////////////////////////////////////////
+                             ERC20 OVERRIDES
+    //////////////////////////////////////////////////////////////*/
+
+    function transfer(address to, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
+        uint256 len = rewardAssets.length;
+        for (uint256 i = 0; i < len; ) {
+            address rewardAsset = rewardAssets[i];
+            _setRewardsSinceLastCheck(rewardAsset);
+            _updateRedeemable(rewardAsset, msg.sender);
+            _updateRedeemable(rewardAsset, to);
+            // safe unchecked: iteration is safe
+            unchecked {
+                ++i;
+            }
+        }
+        return super.transfer(to, amount);
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public virtual override returns (bool) {
+        uint256 len = rewardAssets.length;
+        for (uint256 i = 0; i < len; ) {
+            address rewardAsset = rewardAssets[i];
+            _setRewardsSinceLastCheck(rewardAsset);
+            _updateRedeemable(rewardAsset, from);
+            _updateRedeemable(rewardAsset, to);
+            // safe unchecked: iteration is safe
+            unchecked {
+                ++i;
+            }
+        }
+        return super.transferFrom(from, to, amount);
+    }
+
+    function _mint(address to, uint256 amount) internal virtual override {
+        uint256 len = rewardAssets.length;
+        for (uint256 i = 0; i < len; ) {
+            address rewardAsset = rewardAssets[i];
+            _setRewardsSinceLastCheck(rewardAsset);
+            _updateRedeemable(rewardAsset, to);
+            // safe unchecked: iteration is safe
+            unchecked {
+                ++i;
+            }
+        }
+        super._mint(to, amount);
+    }
+
+    function _burn(address from, uint256 amount) internal virtual override {
+        uint256 len = rewardAssets.length;
+        for (uint256 i = 0; i < len; ) {
+            address rewardAsset = rewardAssets[i];
+            _setRewardsSinceLastCheck(rewardAsset);
+            _updateRedeemable(rewardAsset, from);
+            // safe unchecked: iteration is safe
+            unchecked {
+                ++i;
+            }
+        }
+
+        super._burn(from, amount);
+    }
 }
